@@ -194,6 +194,8 @@ class Simplex
             }
         };
 
+        var_dump($this->cabecalhos[$colunaSelecionada["posicao"]] . " => " . $posicaoLinhaAnterior);
+
         $tabela[$this->cabecalhos[$colunaSelecionada["posicao"]]] = $linhaSelecionada["valor"];
         unset($tabela[$posicaoLinhaAnterior]);
 
