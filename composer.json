@@ -1,0 +1,14 @@
+{
+    "name": "flavio/phpsimplex",
+    "autoload": {
+        "psr-4": {
+            "Flavio\\Phpsimplex\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "flavio roso"
+        }
+    ],
+    "require": {}
+}
