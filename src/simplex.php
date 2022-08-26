@@ -24,6 +24,24 @@ class Simplex
     /** @var array $historico_tabela */
     private $historico_tabela = [];
 
+
+    public function getHistorico()
+    {
+        return $this->historico_tabela;
+    }
+
+
+    public function getCabecalho()
+    {
+        return $this->cabecalhos;
+    }
+
+
+    public function getVariaveisNaoBasicas()
+    {
+        return $this->variaveis_nao_basicas;
+    }
+
     /**
      * construtor
      * @var array $variaveis
@@ -31,13 +49,14 @@ class Simplex
      */
     public function __construct(array $variaveis, array $condicoes)
     {
-        $this->variaveis_nao_basicas = $variaveis;
         $this->condicoes = $condicoes;
 
         $this->adicionarVariavel("Z", 1);
 
         foreach ($variaveis as $indice => $variavel) {
-            $this->adicionarVariavel("X" . ($indice + 1), -$variavel);
+            $titulo = "X" . ($indice + 1);
+            $this->variaveis_nao_basicas[$titulo] = $variavel;
+            $this->adicionarVariavel($titulo, -$variavel);
         }
     }
 
@@ -162,7 +181,7 @@ class Simplex
     private function selecionarLinha($tabela)
     {
         $arrayFiltrado = array_filter($tabela, function ($linha, $posicao) {
-            return $posicao != "Z" && $linha["divisao"] != null;
+            return $posicao != "Z" && $linha["divisao"] != null && $linha["divisao"] > 0;
         }, ARRAY_FILTER_USE_BOTH);
         $minimo = min(array_column($arrayFiltrado, "divisao"));
         $linhaSelecionada = array_filter($arrayFiltrado, function ($linha) use ($minimo) {
@@ -193,8 +212,6 @@ class Simplex
                 $linhaSelecionada["valor"][$indice] = 0;
             }
         };
-
-        var_dump($this->cabecalhos[$colunaSelecionada["posicao"]] . " => " . $posicaoLinhaAnterior);
 
         $tabela[$this->cabecalhos[$colunaSelecionada["posicao"]]] = $linhaSelecionada["valor"];
         unset($tabela[$posicaoLinhaAnterior]);
@@ -233,16 +250,25 @@ class Simplex
         $this->inicializarVariaveisBasicas();
         $tabela = $this->montarTabelaInicial();
         $colunaSelecionada = $this->selecionarColuna($tabela);
-        $this->historico_tabela[] = $tabela;
 
         while ($colunaSelecionada) {
             $tabela = $this->preencherDivisao($tabela, $colunaSelecionada);
             $linhaSelecionada = $this->selecionarLinha($tabela);
+            $this->historico_tabela[] = [
+                "tabela" => $tabela,
+                "linhaSelecionada" => $linhaSelecionada['posicao'],
+                "colunaSelecionada" => $colunaSelecionada["posicao"],
+            ];
+
             $tabela = $this->novaInsersaoTabela($tabela, $linhaSelecionada, $colunaSelecionada);
             $tabela = $this->recalcularLinhasTabela($tabela, $colunaSelecionada);
             $colunaSelecionada = $this->selecionarColuna($tabela);
-            $this->historico_tabela[] = $tabela;
         }
-        print_r($this->historico_tabela);
+
+        $this->historico_tabela[] = [
+            "tabela" => $tabela,
+            "linhaSelecionada" => null,
+            "colunaSelecionada" => null,
+        ];
     }
 }
